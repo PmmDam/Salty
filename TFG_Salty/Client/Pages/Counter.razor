@@ -1,0 +1,27 @@
+﻿@page "/counter"
+
+
+
+<PageTitle>Counter</PageTitle>
+
+<MudText Typo="Typo.h3" GutterBottom="true">Counter</MudText>
+<MudText Class="mb-4">Current count: @currentCount</MudText>
+<MudTextField @bind-Value="input" Label="JSON Key" Variant="Variant.Text" Margin="Margin.Dense" />
+<MudText @bind-Value="response"></MudText>
+<MudButton Color="Color.Primary" Variant="Variant.Filled" @onclick="IncrementCount">Click me</MudButton>
+
+
+
+@code {
+    private int currentCount = 0;
+    private string input = string.Empty;
+    private string response = string.Empty;
+
+ 
+
+    private  void IncrementCount()
+    {
+
+        currentCount++;
+    }
+}
