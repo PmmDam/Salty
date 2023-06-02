@@ -12,11 +12,9 @@ global using TFG_Salty.Server.Services.OrderService;
 global using TFG_Salty.Server.Services.PaymentService;
 global using TFG_Salty.Server.Services.AddressService;
 global using TFG_Salty.Server.Services.ProductTypeService;
+
 //Default
 using Microsoft.AspNetCore.Hosting.StaticWebAssets;
-using Microsoft.AspNetCore.ResponseCompression;
-using Microsoft.EntityFrameworkCore;
-using TFG_Salty.Server.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
