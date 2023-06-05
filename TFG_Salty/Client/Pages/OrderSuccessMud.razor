@@ -1,0 +1,16 @@
+﻿@page "/order-success"
+@inject ICartService CartService
+
+
+<PageTitle>¡Gracias por la compra!</PageTitle>
+
+<MudText Typo="Typo.h3">¡Gracias por la compra!</MudText>
+
+<MudText Typo="Typo.h4">¡Gracias por la compra! Puedes revisar todos tus pedidos<a href="orders">aquí</a></MudText>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await CartService.GetCartItemsCount();
+    }
+}

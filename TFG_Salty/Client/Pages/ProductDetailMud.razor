@@ -1,0 +1,127 @@
+﻿@page "/product/{id:int}"
+@inject IProductService ProductService
+@inject ICartService CartService
+
+
+@if (product == null)
+{
+    <MudText>@message</MudText>
+}
+else
+{
+    <MudPaper Class="pa-md-6 mx-lg-auto mud-theme-secondary">
+        <MudText Typo="Typo.h3">Detalles del producto</MudText>
+    </MudPaper>
+    
+    <MudCard>
+
+        <MudGrid Justify="Justify.Center">
+            <MudItem>
+                @if (!string.IsNullOrEmpty(product.ImageUrl))
+                {
+                    <MudImage Src="@product.ImageUrl" Alt="@product.Title" Elevation="25" Class="rounded-lg"></MudImage>
+                }
+                else
+                {
+                    <MudCarousel Class="mud-width-full" ItemsSource="@product.Images" Style="height:200px;">
+                        <ItemTemplate>
+                            <MudImage Src="@context.Data"></MudImage>
+                        </ItemTemplate>
+                    </MudCarousel>
+                }
+            </MudItem>
+            <MudItem>
+                <MudCardContent>
+                    <MudItem>
+                        <MudText Typo="Typo.h2">@product.Title</MudText>
+                        <MudText>@product.Description</MudText>
+                    </MudItem>
+                    @if (product.Variants != null && product.Variants.Count > 1)
+                    {
+                        <MudSelect T="int" Label="Tipo de producto" AnchorOrigin="Origin.BottomCenter" @bind-Value="currentTypeId" Placeholder="Selecciona uno de los tipos disponibles">
+                            @foreach (var variant in product.Variants)
+                            {
+                                <MudSelectItem Value="@variant.ProductTypeId"> @variant.ProductType.Name</MudSelectItem>
+                            }
+                        </MudSelect>
+                    }
+
+                    @*Comprobamos si el producto tiene un precio original mayor que el de la variante para renderizarlo o no*@
+                    @*Como posible refactor, sería interesante cachear el variant que devuelve GetSelectedVariant()*@
+                    @if (GetSelectedVariant() != null)
+                    {
+                        @if (GetSelectedVariant().OriginalPrice > GetSelectedVariant().Price)
+                        {
+                            <MudText Style="text-decoration:line-through" Color="Color.Surface" Typo="Typo.subtitle2">
+                                @GetSelectedVariant().OriginalPrice€
+                            </MudText>
+                        }
+
+                        <MudText Color=Color.Success Typo="Typo.h6">
+                            @GetSelectedVariant().Price€
+                        </MudText>
+                    }
+
+
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton StartIcon="@Icons.Material.Filled.AddShoppingCart"
+                           Variant="Variant.Filled" 
+                           Color="Color.Secondary" 
+                           @onclick="AddToCart"> Añadir a la cesta</MudButton>
+
+                </MudCardActions>
+            </MudItem>
+        </MudGrid>
+    </MudCard>
+
+
+
+}
+
+@code {
+    private Product? product = null;
+    private string message = string.Empty;
+    private int currentTypeId = 1;
+
+    //Con este atributo especificamos que está variable es un parámetro que va en la propia URL
+    [Parameter]
+    public int Id { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        message = "Cargando producto...";
+        var result = await ProductService.GetProductAsync(Id);
+
+        if (!result.Success)
+        {
+            message = result.Message;
+        }
+        else
+        {
+            product = result.Data;
+            if (product.Variants.Count > 0)
+            {
+                currentTypeId = product.Variants[0].ProductTypeId;
+            }
+        }
+
+    }
+
+    private ProductVariant GetSelectedVariant()
+    {
+        var variant = product.Variants.FirstOrDefault(v => v.ProductTypeId == currentTypeId);
+        return variant;
+    }
+
+    private async Task AddToCart()
+    {
+        var productVariant = GetSelectedVariant();
+        var cartItem = new CartItem
+            {
+                ProductId = productVariant.ProductId,
+                ProductTypeId = productVariant.ProductTypeId
+            };
+        await CartService.AddToCart(cartItem);
+    }
+}
