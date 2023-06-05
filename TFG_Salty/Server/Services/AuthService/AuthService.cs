@@ -146,6 +146,7 @@ namespace TFG_Salty.Server.Services.AuthService
 
         public int GetUserId()
         {
+            var nameIdentifierClaim = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
             return int.Parse(_httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier));
         }
 

@@ -1,0 +1,320 @@
+﻿@*Rutas para llegar a esta página*@
+@page "/admin/product"
+@page "/admin/product/{Id:int}"
+
+@*Servicios*@
+@inject IProductService ProductService
+@inject IProductTypeService ProductTypeService
+@inject ICategoryService CategoryService
+
+@*Otras dependencias*@
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JsRuntime
+
+@if (loading)
+{
+    <span>@message</span>
+}
+else
+{
+    if (product.Editing)
+    {
+        <h3> Editar @product.Title</h3>
+    }
+    else if (product.IsNew)
+    {
+        <h3>Crear un nuevo producto</h3>
+    }
+    <EditForm Model="product" OnValidSubmit="AddOrUpdateProduct">
+
+        @*Aplica validaciones generales en funcion del tipo de input. Estas restricciones se ponen con etiquetas en el modelo correspondiente, en este caso, en la clase Product*@
+        <DataAnnotationsValidator></DataAnnotationsValidator>
+
+        @*Título*@
+        <div class="mb-0">
+            <label for="title"> Título</label>
+            <InputText id="title" @bind-Value="product.Title" class="form-control "></InputText>
+        </div>
+
+        @*Url de la Imágen*@
+        <div class="mb-0">
+            <label for="imageUrl"> Url de la imágen</label>
+            <InputText id="imageUrl" @bind-Value="product.ImageUrl" class="form-control "></InputText>
+        </div>
+
+        @*Imágen*@
+        <div class="mb-0" style="display: flex; flex-wrap:wrap; flex-direction: row; justify-content: center;">
+            @if (!string.IsNullOrEmpty(product.ImageUrl))
+            {
+                <img src="@product.ImageUrl" />
+            }
+            else
+            {
+                foreach (var image in product.Images)
+                {
+                    @*Imagen guardada en la base de datos como un string en base64*@
+                    @*<img src="@image.Data" />
+                    <button type="button" @onclick="(()=>RemoveImage(image.Id))">Borrar</button>*@
+                    <MudCard Class="ma-2">
+                        <MudCardContent>
+                            <MudImage Src="@image.Data"></MudImage>
+                        </MudCardContent>
+                        <MudCardActions Style="justify-content:center;"> 
+                            <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="@(()=> RemoveImage(image.Id))">Borrar</MudButton>
+                        </MudCardActions>
+                    </MudCard>
+                }
+            }
+
+        </div>
+
+
+        @*Imágenes*@
+        <div class="mb-0">
+            <label for="images">Imágenes</label>
+            <InputFile id="images" OnChange="OnFileChange" multiple class="form-control "></InputFile>
+        </div>
+
+        @*Descripción*@
+        <div class="mb-0">
+            <label for="description"> Descripción</label>
+            <InputTextArea id="description" @bind-Value="product.Description" class="form-control "></InputTextArea>
+        </div>
+        <hr />
+
+        <div class="header">
+            <div class="col">
+                Tipo de producto / Variante
+            </div>
+            <div class="col">
+                Precio
+            </div>
+
+            <div class="col">
+                Precio original
+            </div>
+
+            <div class="col">
+                ¿Es visible?
+            </div>
+
+            <div class="col">
+                @*Botones*@
+            </div>
+        </div>
+
+        @foreach (var variant in product.Variants)
+        {
+            <div class="row">
+
+                @*Seleccionar una variante*@
+                <div class="col">
+                    <InputSelect disabled="@variant.Deleted" @bind-Value="variant.ProductTypeId" class="form-control">
+
+
+                        @foreach (var productType in ProductTypeService.ProductTypes)
+                        {
+                            <option value="@productType.Id.ToString()">@productType.Name</option>
+                        }
+
+                    </InputSelect>
+                </div>
+
+                @*Precio de la variante*@
+                <div class="col">
+                    <InputNumber @bind-Value="variant.Price" class="form-control" disabled="@variant.Deleted"></InputNumber>
+                </div>
+
+                @*Precio original*@
+                <div class="col">
+                    <InputNumber @bind-Value="variant.OriginalPrice" class="form-control" disabled="@variant.Deleted"></InputNumber>
+                </div>
+
+                @*Visibilidad*@
+                <div class="col col-visible">
+                    <InputCheckbox @bind-Value="variant.Visible" class="form-check-input" disabled="@variant.Deleted"></InputCheckbox>
+                </div>
+                @*Botón para Borrar*@
+                <div class="col">
+                    <button type="button" class="btn btn-primary" disabled="@variant.Deleted" @onclick="@(()=>RemoveVariant(variant.ProductTypeId))">
+                        <i class="oi oi-trash"></i>
+                    </button>
+                </div>
+            </div>
+        }
+
+        <button type="button" class="btn btn-primary" @onclick="AddVariant"><i class="oi oi-plus">Añadir variante de producto</i></button>
+        <hr />
+
+        @*Categorías del producto*@
+        <div class="mb-0">
+            <label for="category">Categoría</label>
+            <InputSelect id="category" @bind-Value="product.CategoryId" class="form-control">
+                @foreach (var category in CategoryService.AdminCategories)
+                {
+                    <option value="@category.Id">@category.Name</option>
+                }
+            </InputSelect>
+
+        </div>
+
+        @*Producto destacado*@
+        <div class="form-check">
+            <InputCheckbox id="featured" @bind-Value="product.Featured" class="form-check-input"></InputCheckbox>
+            <label for="featured" class="form-check-label">Producto destacado</label>
+        </div>
+
+        @*Es visible*@
+        <div class="form-check">
+            <InputCheckbox id="visible" @bind-Value="product.Visible" class="form-check-input"></InputCheckbox>
+            <label for="visible" class="form-check-label">Visible</label>
+        </div>
+
+        <hr />
+
+        @*Botones de submit/reset...*@
+        <button type="submit" class="btn btn-primary float-end">@btnText</button>
+
+        @*Muestra mensajes de error en función de las restricciones puestas en los modelos y los tipos de dato de los inputs*@
+        <ValidationSummary></ValidationSummary>
+    </EditForm>
+
+    @if (!product.IsNew)
+    {
+        <button type="button" class="btn btn-danger float-start" @onclick="DeleteProduct">Borrar producto</button>
+    }
+}
+
+@code {
+
+    [Parameter]
+    public int Id { get; set; }
+
+    Product product = new Product();
+    bool loading = true;
+    string btnText = string.Empty;
+    string message = "Cargando...";
+
+    ProductType ProductTypeDefaultValue = new ProductType();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ProductTypeService.GetProductTypes();
+        await CategoryService.GetAdminCategories();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        //El id del producto será 0 cuando se crea uno nuevo
+        if (Id == 0)
+        {
+
+            Category defaultCategory = CategoryService.Categories[0];
+            product = new Product
+                {
+                    IsNew = true,
+                    Category = defaultCategory,
+                    CategoryId = defaultCategory.Id
+                };
+
+            btnText = "Crear un nuevo producto";
+        }
+        else
+        {
+            Product dbProduct = (await ProductService.GetProductAsync(Id)).Data;
+
+            //Clausula Guarda
+            if (dbProduct == null)
+            {
+                message = $"El producto con la Id: {Id} no existe";
+                return;
+            }
+            product = dbProduct;
+            product.Editing = true;
+            btnText = "Actualizar producto";
+        }
+        loading = false;
+
+    }
+
+    private void RemoveVariant(int productTypeId)
+    {
+        var variant = product.Variants.Find(v => v.ProductTypeId == productTypeId);
+        if (variant is null)
+        {
+            return;
+        }
+        if (variant.IsNew)
+        {
+            product.Variants.Remove(variant);
+        }
+        else
+        {
+            variant.Deleted = true;
+        }
+    }
+    private void AddVariant()
+    {
+        product.Variants.Add(new ProductVariant { IsNew = true, ProductId = product.Id });
+    }
+
+    private async void AddOrUpdateProduct()
+    {
+        if (product.IsNew)
+        {
+            var result = await ProductService.CreateProductAsync(product);
+            NavigationManager.NavigateTo($"admin/product/{result.Id}");
+        }
+        else
+        {
+            product.IsNew = false;
+            product = await ProductService.UpdateProductAsync(product);
+            NavigationManager.NavigateTo($"admin/product/{product.Id}", true);
+        }
+    }
+    private async void DeleteProduct()
+    {
+        bool result = await JsRuntime.InvokeAsync<bool>("confirm", $"¿Quieres borrar el producto {product.Title}?");
+        if (result)
+        {
+            await ProductService.DeleteProductAsync(product);
+            NavigationManager.NavigateTo("admin/products");
+        }
+
+
+    }
+
+    private async Task OnFileChange(InputFileChangeEventArgs e)
+    {
+        //Elegimos el formato de la imagen
+        var format = "image/png";
+
+        //Obtenemos todas las imagenes que ha lanzado el evento
+        foreach (var image in e.GetMultipleFiles(int.MaxValue))
+        {
+            //Ajustamos el tamaño
+            var resizedImage = await image.RequestImageFileAsync(format,200,200);
+
+            //Obtenemos un array de bytes con el tamaño de la imagen reajustada
+            var buffer = new byte[resizedImage.Size];
+
+            //Abrimos un stream para leer el buffer de la imagen y guardarlo en nuestro array de bytes
+            await resizedImage.OpenReadStream().ReadAsync(buffer);
+
+            //Creamos la imagen con el formato que va a tener en base de datos
+            var imageData = $"data:{format};base64,{Convert.ToBase64String(buffer)}";
+
+            //Lo añádimos a la lista de imagenes del producto
+            product.Images.Add(new Image{Data = imageData});
+        }
+    }
+
+    private void RemoveImage(int imageId)
+    {
+        var image = product.Images.FirstOrDefault(image => image.Id == imageId);
+        if(image != null)
+        {
+            product.Images.Remove(image);
+        }
+    }
+}

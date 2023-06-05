@@ -1,0 +1,142 @@
+﻿@*Url de la página*@
+@page "/admin/categories"
+
+@*Servicios*@
+@inject ICategoryService CategoryService
+
+@*Definimos que el usuario tiene que estar autenticado y autorizado con el role admin para ver esta página*@
+@attribute [Authorize(Roles = "Admin")]
+
+@*Para utilizar correctamente el evento, tenemos que implementar la interfaz IDisposable y asegurarnos de desuscribirnos en el dispose*@
+@implements IDisposable
+
+
+<h3>Categorías</h3>
+
+@*Columnas de la página (Pordía haber hecho un <table></table> propiamente dicho pero estamos a 28/05, voy rápido)*@
+
+<div class="header">
+    <div class="col">Nombre</div>
+    <div class="col">Url</div>
+    <div class="col">Visible</div>
+    <div class="col"></div>
+</div>
+
+@foreach(var category in CategoryService.AdminCategories){
+    @if (category.Editing)
+    {
+        <EditForm Model="currentCategory" OnSubmit="UpdateCategory">
+            <div class="row">
+
+                @*Nombre de la categoría*@
+                <div class ="col">
+                    <InputText @bind-Value = "currentCategory.Name" class="form-control"></InputText>
+                </div>
+
+                @*Url de la categoría*@
+                <div class="col">
+                    <InputText @bind-Value="currentCategory.Url" class="form-control"></InputText>
+                </div>
+
+                @*Checkbox para delimitar si la categoría es visible o no*@
+                <div class="col col-visible">
+                    <InputCheckbox @bind-Value="currentCategory.Visible" class="big-checkbox"></InputCheckbox>
+                </div>
+
+                @*Botones*@
+                <div class="col">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="oi oi-cloud-upload"></i>
+                    </button>
+                    <button type="reset" class="btn btn-primary">
+                        <i class="oi oi-action-undo"></i>
+                    </button>
+                    <button class="btn btn-primary" @onclick=CancelEditing>
+                        <i class="oi oi-circle-x"></i>
+                    </button>
+                </div>
+            </div>
+        </EditForm>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col">
+                @category.Name
+            </div>
+            <div class="col">
+                @category.Url
+            </div>
+            <div class="col col-visible">
+                <span>@(category.Visible ? "🗸" : "❌")</span>
+            </div>
+
+
+            @*Botones*@
+            <div class="col">
+                <button class="btn btn-primary" @onclick="(()=>EditCategory(category))">
+                    <i class="oi oi-pencil"></i>
+                </button>
+                <button class="btn btn-primary" @onclick="(()=>DeleteCategory(category.Id))">
+                    <i class="oi oi-trash"></i>
+                </button>
+            </div>
+        </div>
+    }
+}
+
+<button class="btn btn-primary" @onclick="CreateNewCategory">
+    <i class="oi oi-plus"> Añadir categoría</i>
+</button>
+@code {
+
+    Category currentCategory = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CategoryService.GetAdminCategories();
+        //Nos suscribimos al evento que se llama cuando se hacen operaciones crud sobre las categorias 
+        //para llamar al StateHasChanged nativo de Blazor cunado se invoque
+        CategoryService.OnChange += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        //Nos desuscribimos del evento cuando liberamos recursos
+        CategoryService.OnChange -= StateHasChanged;
+    }
+
+    private void CreateNewCategory()
+    {
+        currentCategory = CategoryService.CreateNewCategory();
+    }
+
+    private void EditCategory(Category category)
+    {
+        category.Editing = true;
+        currentCategory = category;
+    }
+    private async Task UpdateCategory()
+    {
+        if (currentCategory.IsNew)
+        {
+            await CategoryService.AddCategory(currentCategory);
+        }
+        else
+        {
+            await CategoryService.UpdateCategory(currentCategory);
+            currentCategory = new Category();
+        }
+    }
+
+    private async Task CancelEditing()
+    {
+        currentCategory = new Category();
+        await CategoryService.GetAdminCategories();
+    }
+
+    private async Task DeleteCategory(int id)
+    {
+        await CategoryService.DeleteCategory(id);
+    }
+}

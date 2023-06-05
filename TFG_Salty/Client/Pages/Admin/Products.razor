@@ -1,0 +1,90 @@
+﻿@page "/admin/products"
+@inject IProductService ProductService
+@inject NavigationManager NavigationManager
+@attribute [Authorize(Roles = "Admin")]
+
+
+<h3>Products</h3>
+
+@if (ProductService.AdminProducts == null)
+{
+    <span>Cargando Products...</span>
+}
+else
+{
+    <button class="btn btn-primary" @onclick="CreateProduct">
+        <i class="oi oi-plus"> Añadir un nuevo producto</i>
+    </button>
+    <table class="table">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Producto</th>
+                <th>Variante</th>
+                <th>Precio</th>
+                <th>Visible</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @*Es un foreach que implemente lazy loading items en el DOM, es decir, permite ir cargando los componentes según sea necesario*@
+            <Virtualize Items="ProductService.AdminProducts" Context="product">
+                <tr>
+                    <td>
+                        @if (!string.IsNullOrEmpty(product.ImageUrl))
+                        {
+                            <img src="@product.ImageUrl" />
+                        }
+                        else if (product.Images.Count > 0)
+                        {
+                            <img src="@product.Images[0].Data" />
+                        }
+                        
+                    </td>
+                    <td>@product.Title</td>
+                    <td>
+                        @foreach (var variant in product.Variants)
+                        {
+                            <span>@variant.ProductType.Name</span>
+
+                            <br />
+                        }
+                    </td>
+                    <td>
+                        @foreach (var variant in product.Variants)
+                        {
+                            <span>@variant.Price</span>
+
+                            <br />
+                        }
+                    </td>
+                    <td>@(product.Visible ? "🗸" : "❌")</td>
+                    <td>
+                        <button class="btn btn-primary" @onclick="(()=> EditProduct(product.Id))">
+                            <i class="oi oi-pencil"></i>
+                        </button>
+                    </td>
+                </tr>
+            </Virtualize>
+        </tbody>
+
+    </table>
+}
+
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        //Inicializamos la lista de productos
+        await ProductService.GetAdminProducts();
+    }
+    private void EditProduct(int productId)
+    {
+        NavigationManager.NavigateTo($"admin/product/{productId}");
+    }
+    private void CreateProduct()
+    {
+        NavigationManager.NavigateTo("admin/product");
+    }
+
+}

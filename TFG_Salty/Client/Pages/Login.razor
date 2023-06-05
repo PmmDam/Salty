@@ -1,0 +1,81 @@
+﻿@page "/login"
+@using Microsoft.AspNetCore.WebUtilities;
+@inject IAuthService AuthService
+@inject ILocalStorageService LocalStorage
+@inject ICartService CartService
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+
+
+<PageTitle>Login</PageTitle>
+<h3>Login</h3>
+<EditForm Model="user" OnValidSubmit="HandleLoginAsync">
+    <DataAnnotationsValidator />
+    <MudItem xs="12" md="6" lg="4" class="mb-3">
+        <MudTextField Label="Email" @bind-Value="user.Email" Variant="Variant.Filled" />
+        <ValidationMessage For="@(() => user.Email)" />
+    </MudItem>
+    <MudItem xs="12" md="6" lg="4" class="mb-3">
+        <MudTextField Label="Password" @bind-Value="user.Password" Variant="Variant.Filled" Type="InputType.Password" />
+        <ValidationMessage For="@(() => user.Password)" />
+    </MudItem>
+    <ValidationSummary />
+    <MudButton Type="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">Login</MudButton>
+
+
+</EditForm>
+
+<div class="text-danger">
+    <span>@errorMessage</span>
+</div>
+
+@code {
+    private UserLogin user = new UserLogin();
+
+    private string errorMessage = string.Empty;
+
+    private string returnUrl = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("returnUrl", out var url))
+        {
+            returnUrl = url;
+        }
+    }
+
+
+    private async Task HandleLoginAsync()
+    {
+        //Hacemos el post request para logeuar al usuario
+        var result = await AuthService.Login(user);
+
+        //Si el serviceResponse ha salido bien
+        if (result.Success)
+        {
+            //No no hay mensaje de error
+            errorMessage = string.Empty;
+
+            //Guardamos en el localStorage el token de autenticación devuelto por la API
+            await LocalStorage.SetItemAsync("authToken", result.Data);
+
+            //Actualizamos el authenticationStateProcider para que se autentique el usuario
+            await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+            //Almacenamos los items que hay en el localStorage cuando nos logueamos
+            await CartService.StoreCartItems(true);
+
+            await CartService.GetCartItemsCount();
+
+            NavigationManager.NavigateTo("");
+        }
+        else
+        {
+            //Lanzamos el mensaje de error devuelto por la API
+            errorMessage = result.Message;
+        }
+    }
+
+}

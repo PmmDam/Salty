@@ -1,0 +1,7 @@
+﻿.top-row a {
+    margin-left: 0!important; /*Este important no lo ha visto nadie, esto es necesario porque soy muy buen diseñador*/
+}
+
+.dropdown-item:hover {
+    background-color: white;
+}

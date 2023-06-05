@@ -12,10 +12,10 @@
         <AuthorizeView>
             <Authorized>
                 <MudNavLink Href="profile" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Perfil</MudNavLink>
-                <a href="orders" class="dropdown-item">Pedidos</a>
-                <hr />
+                <MudNavLink Href="orders" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.ProductionQuantityLimits">Pedidos</MudNavLink>
+                <MudDivider />
                 <AdminMenu />
-                <button class="dropdown-item" @onclick="Logout">Logout</button>
+                <MudButton Icon="@Icons.Material.Filled.Logout"  @onclick="Logout">Logout</MudButton>
             </Authorized>
 
             <NotAuthorized>
