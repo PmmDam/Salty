@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.ResponseCaching;
+﻿using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.ResponseCaching;
 using Microsoft.IdentityModel.Tokens;
 using System.Reflection.Metadata.Ecma335;
 
@@ -305,6 +306,24 @@ namespace TFG_Salty.Server.Services.ProductService
             dbProduct.Deleted = true;
             await _context.SaveChangesAsync().ConfigureAwait(false);
             return new ServiceResponse<bool> {  Data = true};
+        }
+
+        public async Task<ServiceResponse<List<Product>>> SearchProductsAsync(string searchText)
+        {
+            var products = await _context.Products
+                         .Where(product => product.Title.ToLower().Contains(searchText.ToLower()) ||
+                         product.Description.ToLower().Contains(searchText.ToLower()) && product.Visible && !product.Deleted)
+                         .Include(product => product.Variants.Where(variant => variant.Visible && !variant.Deleted))
+            .Include(p => p.Images)
+                         .ToListAsync();
+
+
+            var response = new ServiceResponse<List<Product>>()
+            {
+               Data = products
+            };
+
+            return response;
         }
     }
 }

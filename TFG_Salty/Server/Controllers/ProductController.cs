@@ -40,6 +40,12 @@ namespace TFG_Salty.Server.Controllers
         }
 
 
+        [HttpGet("search/{searchText}")]
+        public async Task<ActionResult<ServiceResponse<ProductSearchResultDTO>>> SearchProduct(string searchText)
+        {
+            var result = await _productService.SearchProductsAsync(searchText);
+            return Ok(result);
+        }
         [HttpGet("search/{searchText}/{page}")]
         public async Task<ActionResult<ServiceResponse<ProductSearchResultDTO>>> SearchProduct(string searchText,int page = 1)
         {

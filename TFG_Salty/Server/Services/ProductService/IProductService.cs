@@ -29,6 +29,8 @@
         /// <returns></returns>
         Task<ServiceResponse<ProductSearchResultDTO>> SearchProductsAsync(string searchText, int page);
 
+        Task<ServiceResponse<List<Product>>> SearchProductsAsync(string searchText);
+
 
         /// <summary>
         /// Devuelve una lista de productos sugeridos/recomendados en función del parámetro de búsqueda

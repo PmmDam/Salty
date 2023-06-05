@@ -76,5 +76,6 @@
         Task<Product> CreateProductAsync(Product product);
         Task<Product> UpdateProductAsync(Product product);
         Task DeleteProductAsync(Product product);
+        Task<List<Product>> SearchProduct(string searchText);
     }
 }

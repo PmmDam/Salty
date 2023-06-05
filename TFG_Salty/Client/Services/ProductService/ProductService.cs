@@ -106,5 +106,10 @@ namespace TFG_Salty.Client.Services.ProductService
             var result = await _http.DeleteAsync($"api/product/{product.Id}");
             
         }
+
+        public async Task<List<Product>> SearchProduct(string searchText)
+        {
+            return (await _http.GetFromJsonAsync<ServiceResponse<List<Product>>>($"api/product/search/{searchText}")).Data;
+        }
     }
 }

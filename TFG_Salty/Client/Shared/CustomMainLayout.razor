@@ -8,7 +8,11 @@
     <MudAppBar Elevation="0">
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
         <MudSpacer />
-        <Search />
+        
+        
+        @*<Search />*@
+        <SearchBarBlazored></SearchBarBlazored>
+
         <CartCounter></CartCounter>
         <UserButton/>
         <MudIconButton Icon="@Icons.Custom.Brands.MudBlazor" Color="Color.Inherit" Href="https://mudblazor.com/" Target="_blank" />

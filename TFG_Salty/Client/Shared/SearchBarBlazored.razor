@@ -1,0 +1,43 @@
+﻿@inject NavigationManager navigationManager
+@inject IProductService productService
+@inject NavigationManager NavigationManager
+
+
+<BlazoredTypeahead SearchMethod="@SearchProduct"
+                   TValue="Product"
+                   TItem="Product"
+                   Value="selectedProduct"
+                   ValueChanged="HandleSearch"
+                   ValueExpression="@(()=>selectedProduct)"
+                   placeholder="Buscando...">
+    <SelectedTemplate>
+        <span style="color:white">@context.Title</span>
+
+    </SelectedTemplate>
+    <ResultTemplate>
+        <span style="color:black">@context.Title</span>
+    </ResultTemplate>
+    <NotFoundTemplate>
+        No tenemos ningún producto así
+    </NotFoundTemplate>
+</BlazoredTypeahead>
+@code {
+
+
+    Product selectedProduct = null;
+
+    private async Task<IEnumerable<Product>> SearchProduct(string searchText)
+    {
+        var response = await productService.SearchProduct(searchText);
+        return response;
+    }
+
+    private void HandleSearch(Product product)
+    {
+        if(product is null){return;}
+
+        selectedProduct = product;
+        NavigationManager.NavigateTo($"search/{selectedProduct.Id}/1");
+    }
+
+}
