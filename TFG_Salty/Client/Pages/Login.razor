@@ -10,20 +10,29 @@
 
 <PageTitle>Login</PageTitle>
 <h3>Login</h3>
-<EditForm Model="user" OnValidSubmit="HandleLoginAsync">
+<EditForm Model="user" OnValidSubmit="OnValidSubmit">
     <DataAnnotationsValidator />
-    <MudItem xs="12" md="6" lg="4" class="mb-3">
-        <MudTextField Label="Email" @bind-Value="user.Email" Variant="Variant.Filled" />
-        <ValidationMessage For="@(() => user.Email)" />
-    </MudItem>
-    <MudItem xs="12" md="6" lg="4" class="mb-3">
-        <MudTextField Label="Password" @bind-Value="user.Password" Variant="Variant.Filled" Type="InputType.Password" />
-        <ValidationMessage For="@(() => user.Password)" />
-    </MudItem>
-    <ValidationSummary />
-    <MudButton Type="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">Login</MudButton>
+
+    <MudCardContent>
+        <MudTextField Label="Email"
+                      @bind-Value="user.Email"
+                      Variant="Variant.Filled"
+                      For="@(() => user.Email)"
+                      HelperText="Introduce una dirección de correo válida" />
 
 
+        <MudTextField Label="Contraseña"
+                      @bind-Value="user.Password"
+                      Variant="Variant.Filled"
+                      For="@(() => user.Password)"
+                      InputType="InputType.Password"
+                      Class="mt-3"
+                      HelperText="Entre 6 y 100 caracteres" />
+
+    </MudCardContent>
+    <MudCardActions>
+        <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Login</MudButton>
+    </MudCardActions>
 </EditForm>
 
 <div class="text-danger">
@@ -46,7 +55,11 @@
         }
     }
 
-
+    private async Task OnValidSubmit()
+    {
+        await HandleLoginAsync();
+        StateHasChanged();
+    }
     private async Task HandleLoginAsync()
     {
         //Hacemos el post request para logeuar al usuario

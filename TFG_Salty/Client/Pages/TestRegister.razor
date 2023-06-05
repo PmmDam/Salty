@@ -1,0 +1,77 @@
+﻿@*URL Ruta*@
+@page "/register"
+
+@*Dependencias*@
+@inject IAuthService AuthService
+
+
+<PageTitle>Registro</PageTitle>
+<h3>Sign in</h3>
+
+@*Formulario*@
+<EditForm Model="user" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator />
+
+    <MudItem xs="12" sm="7">
+        <MudCardContent>
+            <MudTextField Label="Email"
+                          @bind-Value="user.Email"
+                          Variant="Variant.Filled"
+                          For="@(() => user.Email)"
+                          HelperText="Introduce una dirección de correo válida" />
+
+
+            <MudTextField Label="Contraseña"
+                          @bind-Value="user.Password"
+                          Variant="Variant.Filled"
+                          For="@(() => user.Password)"
+                          InputType="InputType.Password"
+                          Class="mt-3" 
+                          HelperText="Entre 6 y 100 caracteres" />
+
+
+            <MudTextField Label="Confirmar contraseña"
+                          @bind-Value="user.ConfirmPassword"
+                          For="@(() => user.ConfirmPassword)"
+                          InputType="InputType.Password"
+                          Class="mt-3" 
+                          Variant="Variant.Filled" />
+
+        </MudCardContent>
+        <MudCardActions>
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Register</MudButton>
+        </MudCardActions>
+    </MudItem>
+
+    <div>
+        <span>@message</span>
+    </div>
+</EditForm>
+
+
+@code {
+
+
+
+    UserRegister user = new UserRegister();
+    bool success;
+    string message = string.Empty;
+    string messageCssClass = string.Empty;
+
+    async Task HandleRegistration()
+    {
+        var result = await AuthService.RegisterAsync(user);
+        success = result.Success;
+        message = result.Message;
+
+        messageCssClass = success ? "text-succes" : "text-danger";
+    }
+
+    private async Task OnValidSubmit(EditContext context)
+    {
+        await HandleRegistration();
+        StateHasChanged();
+        
+    }
+
+}
