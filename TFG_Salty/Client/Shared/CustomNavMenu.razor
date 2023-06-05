@@ -1,0 +1,26 @@
+﻿@inject ICategoryService CategoryService
+@implements IDisposable
+
+
+<MudNavMenu>
+    <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
+
+    @*Bucle que incluye lazy loading*@
+    <Virtualize Items="@CategoryService.Categories" Context="category">
+        <MudNavLink Href="@category.Url" Match="NavLinkMatch.Prefix" >@category.Name</MudNavLink>
+    </Virtualize>
+    
+</MudNavMenu>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await CategoryService.GetCategories();
+        CategoryService.OnChange += StateHasChanged;
+
+    }
+    public void Dispose()
+    {
+        CategoryService.OnChange -= StateHasChanged;
+    }
+}

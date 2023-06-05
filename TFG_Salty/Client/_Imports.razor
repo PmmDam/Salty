@@ -7,8 +7,20 @@
 @using Microsoft.AspNetCore.Components.WebAssembly.Http
 @using Microsoft.JSInterop
 @using MudBlazor
+@using MudBlazor.Components
 @using TFG_Salty.Client
 @using TFG_Salty.Client.Shared
 
-
 @*Servicios*@
+@using TFG_Salty.Client.Services.ProductService
+@using TFG_Salty.Client.Services.CategoryService
+@using TFG_Salty.Client.Services.CartService
+@using TFG_Salty.Client.Services.AuthService
+@using TFG_Salty.Client.Services.OrderService
+@using TFG_Salty.Client.Services.AddressService
+@using TFG_Salty.Client.Services.ProductTypeService
+
+@*Paquetes Nuget*@
+@using Blazored.LocalStorage
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Authorization

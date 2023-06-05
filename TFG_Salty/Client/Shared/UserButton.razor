@@ -1,0 +1,69 @@
+﻿@inject ILocalStorageService LocalStorage
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+@inject ICartService CartService
+
+
+
+
+<MudMenu Icon="@Icons.Outlined.Person">
+
+    <CascadingAuthenticationState>
+        <AuthorizeView>
+            <Authorized>
+                <MudNavLink Href="profile" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Perfil</MudNavLink>
+                <a href="orders" class="dropdown-item">Pedidos</a>
+                <hr />
+                <AdminMenu />
+                <button class="dropdown-item" @onclick="Logout">Logout</button>
+            </Authorized>
+
+            <NotAuthorized>
+                <MudNavLink Href="@loginUrl" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Login">Login</MudNavLink>
+                <MudNavLink Href="register" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.CoPresent">Registro</MudNavLink>
+            </NotAuthorized>
+
+
+        </AuthorizeView>
+    </CascadingAuthenticationState>
+</MudMenu>
+
+
+@code {
+    private bool showUserMenu = false;
+
+    private string UserMenuCssClass => showUserMenu ? "show-menu" : null;
+    private string loginUrl = string.Empty;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        loginUrl = $"login?returnUrl={@NavigationManager.ToBaseRelativePath(NavigationManager.Uri)}";
+    }
+
+    private void ToggleUserMenu()
+    {
+        showUserMenu = !showUserMenu;
+    }
+
+    private async Task HideUserMenu()
+    {
+        await Task.Delay(200);
+        showUserMenu = false;
+    }
+
+    private async Task Logout()
+    {
+        //Borramos el token de autenticación
+        await LocalStorage.RemoveItemAsync("authToken");
+
+        await CartService.GetCartItemsCount();
+
+        //Actualizamos el AuthenticationStateProvider pero que el usuario no esté autenticado
+        await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+        //Navegamos a la home
+        NavigationManager.NavigateTo("");
+    }
+
+}

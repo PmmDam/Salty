@@ -1,0 +1,29 @@
+﻿@inject ICartService CartService
+@inject ISyncLocalStorageService localStorage
+@implements IDisposable
+
+<MudButton Href="cart" Color="Color.Info" Class="btn">
+    <MudIcon Icon="@Icons.Outlined.ShoppingCart" />
+    <MudBadge Color="Color.Error" Content="@GetCartItemsCount()" />
+</MudButton>
+
+@code {
+
+
+    protected override void OnInitialized()
+    {
+        CartService.OnChange += StateHasChanged;
+    }
+    public void Dispose()
+    {
+        CartService.OnChange -= StateHasChanged;
+    }
+    private int GetCartItemsCount()
+    {
+        var count = localStorage.GetItem<int>("cartItemsCount");
+        return count;
+    }
+
+    
+
+}

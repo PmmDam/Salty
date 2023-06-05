@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.33627.172
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TFG_Salty.Client", "TFG_Salty\Client\TFG_Salty.Client.csproj", "{C135E619-DA7D-4447-8D86-548DA9FBB12F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TFG_Salty.Client", "TFG_Salty\Client\TFG_Salty.Client.csproj", "{C135E619-DA7D-4447-8D86-548DA9FBB12F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TFG_Salty.Server", "TFG_Salty\Server\TFG_Salty.Server.csproj", "{19ABD451-E129-45C6-B6DC-8D6ACB70933F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TFG_Salty.Server", "TFG_Salty\Server\TFG_Salty.Server.csproj", "{19ABD451-E129-45C6-B6DC-8D6ACB70933F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TFG_Salty.Shared", "TFG_Salty\Shared\TFG_Salty.Shared.csproj", "{5FA96B2D-5758-4BE3-93FA-78088F84CE2A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TFG_Salty.Shared", "TFG_Salty\Shared\TFG_Salty.Shared.csproj", "{5FA96B2D-5758-4BE3-93FA-78088F84CE2A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
