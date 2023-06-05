@@ -1,0 +1,105 @@
+﻿@page "/test-cart"
+@inject ICartService CartService
+@inject IOrderService OrderService
+@inject IAuthService AuthService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Cesta de la compra</PageTitle>
+
+<MudText Typo="Typo.h3">Cesta de la compra</MudText>
+
+@if (cartProducts == null || cartProducts.Count == 0)
+{
+    <span>@message</span>
+}
+
+else
+{
+        @foreach (var product in cartProducts)
+        {
+            <MudCard>
+                <MudItem>
+                    <MudImage Src="@product.ImageUrl"></MudImage>
+                </MudItem>
+                <MudItem>
+                    <MudText Typo="Typo.h3"> <a href="/product/@product.ProductId">@product.Title</a> </MudText>
+                    <MudText Typo="Typo.h3">@product.ProductType</MudText>
+                    <MudButton Icon="@Icons.Material.Filled.Logout"
+                       Color=Color.Error @OnClick="@(()=> RemoveProductFromCart(product.ProductId,product.ProductTypeId))">Borrar producto</MudButton>
+                    <MudNumericField @bind-Value="@product.Quantity" Label="Standard" Variant="Variant.Text" Min="0" Max="10"></MudNumericField>
+                </MudItem>
+                <MudItem>
+                    <MudText Typo="Typo.h3"> @(product.Price * product.Quantity)€ </MudText>
+                </MudItem>
+
+            </MudCard>
+        }
+        <MudItem>
+            <MudText Typo="Typo.h3"> Total (@cartProducts.Count): @cartProducts.Sum(product => @product.Price*product.Quantity)€</MudText>
+        </MudItem>
+
+    @if (isUserAuthenticated)
+    {
+        <MudItem>
+            <MudText Typo="Typo.h5">Dirección de envío</MudText>
+         
+            <AddressForm></AddressForm>
+        </MudItem>
+    }
+    
+    <MudButton ButtonType="ButtonType.Button" @OnClick="PlaceOrder"> Realizar pedidos</MudButton>
+}
+
+
+
+@code {
+    List<CartProductResponseDTO> cartProducts = null;
+    string message = "Cargando productos...";
+
+    //Flag para comprobar si el usuario está autenticado y así poder enseñar el EditForm o no.
+    //Esto debemos hacerlo así ya que no podemos ejecutar directamente el método en el html a pelo,
+    //lo ejecutamos en el OnInitializeAsync y en función del resultado actualizamos el flag
+    bool isUserAuthenticated = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isUserAuthenticated = await AuthService.IsUserAuthenticated();
+        await LoadCart();
+
+    }
+
+    private async Task RemoveProductFromCart(int productId, int productTypeId)
+    {
+        await CartService.RemoveProductFromCart(productId, productTypeId);
+        await LoadCart();
+    }
+
+    private async Task LoadCart()
+    {
+        await CartService.GetCartItemsCount();
+        cartProducts = await CartService.GetCartProducts();
+
+        if (cartProducts == null || cartProducts.Count == 0)
+        {
+            message = "La cesta está vacía.";
+
+        }
+
+    }
+
+    private async Task UpdateQuantity(ChangeEventArgs e, CartProductResponseDTO product)
+    {
+        product.Quantity = int.Parse(e.Value.ToString());
+        if (product.Quantity < 1)
+        {
+            product.Quantity = 1;
+        }
+        await CartService.UpdateQuantity(product);
+    }
+
+    private async Task PlaceOrder()
+    {
+        string url = await OrderService.PlaceOrder();
+        NavigationManager.NavigateTo(url);
+    }
+}

@@ -1,0 +1,50 @@
+﻿@page "/orders"
+@inject IOrderService OrderService
+
+<MudText>Pedidos</MudText>
+
+@if (orders == null)
+{
+    <MudText>Cargando los pedidos...</MudText>
+}
+else if (orders.Count <= 0)
+{
+    <MudText> has realizado pedidos, todavía ;)</MudText>
+}
+else
+{
+    foreach (var order in orders)
+    {
+        <MudCard>
+
+
+
+            <MudCardContent>
+                <MudItem>
+                    <MudImage Class="rounded-lg" Fluid="true" Width="300" Height="300" Src="@order.ProductImageUrl"></MudImage>
+                </MudItem>
+                <MudItem>
+                    <MudText>@order.Product</MudText>
+                    <MudText>@order.OrderDate</MudText>
+                </MudItem>
+                <MudItem>
+                    <MudText><a Href="orders/@order.Id">Detalles del pedido</a></MudText>
+                </MudItem>
+                <MudItem>
+                    <MudText>@order.TotalPrice€</MudText>
+                </MudItem>
+            </MudCardContent>
+        </MudCard>
+
+
+    
+    }
+}
+@code {
+    List<OrderOverviewResponseDTO> orders = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        orders = await OrderService.GetOrders();
+    }
+}
